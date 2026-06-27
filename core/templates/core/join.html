@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+{% block title %}Join {{ group.name }} — SplitEasy{% endblock %}
+
+{% block content %}
+<div style="min-height:calc(100vh - 60px); display:flex; align-items:center; justify-content:center; padding:40px 20px;">
+  <div style="width:100%; max-width:400px;">
+
+    <div style="text-align:center; margin-bottom:32px;">
+      <div style="font-size:2.5rem; margin-bottom:12px;">👋</div>
+      <h1 style="font-size:1.5rem; font-weight:800; margin-bottom:8px;">You're invited!</h1>
+      <p class="text-muted">Someone added you to</p>
+      <p style="font-size:1.2rem; font-weight:700; color:var(--accent); margin-top:4px;">{{ group.name }}</p>
+      {% if group.description %}
+        <p class="text-muted fs-sm" style="margin-top:6px;">{{ group.description }}</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1rem; font-weight:700; margin-bottom:16px;">Enter your name to join</h2>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" name="name" placeholder="e.g. Rahul, Priya, Aakash" required autofocus maxlength="100" />
+        </div>
+        <p class="text-muted fs-sm" style="margin-bottom:16px;">
+          If you already joined with a name, enter the same name to continue.
+        </p>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;">
+          Join Group →
+        </button>
+      </form>
+    </div>
+
+    <p class="text-muted fs-sm" style="text-align:center; margin-top:16px;">
+      No account needed. Just your name.
+    </p>
+  </div>
+</div>
+{% endblock %}

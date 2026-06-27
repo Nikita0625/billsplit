@@ -1,0 +1,273 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ group.name }} — BillSplit{% endblock %}
+
+{% block nav_extra %}
+<div class="nav-group-name">{{ group.name }}</div>
+{% endblock %}
+
+{% block content %}
+<div class="group-header">
+    <div class="group-info">
+        <h1>{{ group.name }}</h1>
+        {% if group.description %}<p class="group-desc">{{ group.description }}</p>{% endif %}
+        <div class="group-meta">
+            <span>👥 {{ members.count }} member{{ members.count|pluralize }}</span>
+            <span>💰 Total: {{ group.currency }}{{ total_expenses }}</span>
+            <span>🧾 {{ expenses.count }} expense{{ expenses.count|pluralize }}</span>
+        </div>
+    </div>
+    <div class="group-actions">
+        <button class="btn btn-outline" onclick="copyLink()">🔗 Copy Link</button>
+        {% if current_member %}
+            <a href="{% url 'add_expense' group.id %}" class="btn btn-primary">+ Add Expense</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if not current_member %}
+<div class="join-banner">
+    <div class="join-banner-text">
+        <strong>👋 You're viewing this group.</strong>
+        Enter your name to join and add your own expenses.
+    </div>
+    <form method="POST" action="{% url 'join_group' group.id %}" class="join-form">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Your name" required maxlength="100">
+        <button type="submit" class="btn btn-primary">Join Group</button>
+    </form>
+</div>
+{% else %}
+<div class="member-badge">
+    ✅ You're in this group as <strong>{{ current_member.name }}</strong>
+    &nbsp;·&nbsp;
+    <a href="{% url 'add_expense' group.id %}" style="color:#4f46e5;font-weight:700;">
+        + Add your expense
+    </a>
+</div>
+{% endif %}
+
+<div class="group-grid">
+
+    <div class="section">
+        <div class="section-header">
+            <h2>Expenses</h2>
+            <span class="badge">{{ expenses.count }}</span>
+        </div>
+
+        {% if expenses %}
+        <div class="expense-list">
+            {% for expense in expenses %}
+            <div class="expense-card">
+                <div class="expense-main">
+                    <div class="expense-icon">🧾</div>
+                    <div class="expense-details">
+                        <div class="expense-title-row">
+                            <span class="expense-title">{{ expense.title }}</span>
+                            {% if expense.proof_type == 'cash' %}
+                                <a href="{% url 'view_proof' group.id expense.id %}" class="proof-badge cash">💵 Cash</a>
+                            {% elif expense.proof_type == 'image' %}
+                                <a href="{% url 'view_proof' group.id expense.id %}" class="proof-badge image">📸 Screenshot</a>
+                            {% else %}
+                                <span class="proof-badge none">No Proof</span>
+                            {% endif %}
+                        </div>
+                        <div class="expense-meta">
+                            Paid by <strong>{{ expense.paid_by.name }}</strong>
+                            · {{ expense.created_at|date:"d M, h:i A" }}
+                            {% if expense.notes %} · <em>{{ expense.notes }}</em>{% endif %}
+                        </div>
+                        <div class="expense-splits">
+                            Split:
+                            {% for split in expense.splits.all %}
+                                <span class="split-tag">
+                                    {{ split.member.name }} ({{ group.currency }}{{ split.share_amount }})
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="expense-amount">{{ group.currency }}{{ expense.amount }}</div>
+                </div>
+                {% if current_member %}
+                <div class="expense-actions">
+                    <a href="{% url 'view_proof' group.id expense.id %}" class="btn-proof-sm">
+                        View Proof
+                    </a>
+                    <form method="POST" action="{% url 'delete_expense' group.id expense.id %}"
+                        onsubmit="return confirm('Delete this expense?')" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-danger-sm">Delete</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🧾</div>
+            <p>No expenses yet. Anyone in the group can add their expenses!</p>
+            {% if current_member %}
+                <a href="{% url 'add_expense' group.id %}" class="btn btn-primary">Add First Expense</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="sidebar">
+
+        <div class="section">
+            <div class="section-header"><h2>Balances</h2></div>
+            <div class="balance-list">
+                {% for b in balances %}
+                <div class="balance-item">
+                    <div class="member-avatar">{{ b.member.name|first|upper }}</div>
+                    <div class="balance-info">
+                        <div class="balance-name">
+                            {{ b.member.name }}
+                            {% if current_member and b.member.id == current_member.id %}
+                                <span class="you-tag">you</span>
+                            {% endif %}
+                        </div>
+                        <div class="balance-amount
+                            {% if b.balance > 0 %}owed
+                            {% elif b.balance < 0 %}owes
+                            {% else %}settled{% endif %}">
+                            {% if b.balance > 0 %}
+                                gets back {{ group.currency }}{{ b.balance }}
+                            {% elif b.balance < 0 %}
+                                owes {{ group.currency }}{{ b.balance|stringformat:".2f"|slice:"1:" }}
+                            {% else %}
+                                all settled ✓
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>Settle Up</h2>
+                {% if settlements %}
+                    <span class="badge badge-orange">
+                        {{ settlements|length }} payment{{ settlements|length|pluralize }}
+                    </span>
+                {% endif %}
+            </div>
+            {% if settlements %}
+            <div class="settlement-list">
+                {% for s in settlements %}
+                <div class="settlement-card">
+                    <div class="settlement-from">{{ s.from_name }}</div>
+                    <div class="settlement-arrow">
+                        <div class="arrow-line"></div>
+                        <div class="settlement-amt">{{ group.currency }}{{ s.amount }}</div>
+                        <div class="arrow-head">→</div>
+                    </div>
+                    <div class="settlement-to">{{ s.to_name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state small">
+                <div class="empty-icon">🎉</div>
+                <p>Everyone is settled up!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>Members</h2>
+                <span class="badge">{{ members.count }}</span>
+            </div>
+            <div class="member-list">
+                {% for member in members %}
+                <div class="member-item">
+                    <div class="member-avatar sm">{{ member.name|first|upper }}</div>
+                    <span>{{ member.name }}</span>
+                    {% if current_member and member.id == current_member.id %}
+                        <span class="you-tag">you</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        
+        <div class="section">
+            <div class="section-header">
+                <h2>💸 Personal IOUs</h2>
+                {% if ious %}
+                    <span class="badge badge-orange">{{ ious.count }}</span>
+                {% endif %}
+            </div>
+
+            {% if current_member %}
+            <div style="padding: 10px 16px; border-bottom: 1px solid var(--border);">
+                <a href="{% url 'add_iou' group.id %}" class="btn btn-outline" style="width:100%; justify-content:center;">
+                    + Record Personal IOU
+                </a>
+            </div>
+            {% endif %}
+
+            {% if ious %}
+                <div class="iou-list">
+                    {% for iou in ious %}
+                    <div class="iou-card">
+                        <div class="iou-main">
+                            <div class="iou-info">
+                                <div class="iou-title">{{ iou.reason }}</div>
+                                <div class="iou-meta">
+                                    <strong>{{ iou.lender.name }}</strong> lent to
+                                    <strong>{{ iou.borrower.name }}</strong>
+                                    · {{ iou.created_at|date:"d M" }}
+                                </div>
+                                {% if iou.proof_type == 'cash' %}
+                                    <span class="proof-badge cash">💵 Cash</span>
+                                {% elif iou.proof_type == 'image' %}
+                                    <span class="proof-badge image">📸 Screenshot</span>
+                                {% else %}
+                                    <span class="proof-badge none">No Proof</span>
+                                {% endif %}
+                            </div>
+                            <div class="iou-amount">{{ group.currency }}{{ iou.amount }}</div>
+                        </div>
+                        {% if current_member %}
+                        <div class="expense-actions">
+                            <form method="POST" action="{% url 'delete_iou' group.id iou.id %}"
+                                onsubmit="return confirm('Delete this IOU?')" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-danger-sm">Delete</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state small">
+                    <p>No personal IOUs yet.</p>
+                </div>
+            {% endif %}
+        </div>
+        <!-- END IOU SECTION -->
+    </div>
+</div>
+
+<input type="hidden" id="group-link" value="{{ request.build_absolute_uri }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyLink() {
+    const link = document.getElementById('group-link').value;
+    navigator.clipboard.writeText(link).then(() => {
+        showToast('✅ Group link copied! Share it with your friends.');
+    }).catch(() => {
+        prompt('Copy this link:', link);
+    });
+}
+</script>
+{% endblock %}

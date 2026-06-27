@@ -1,0 +1,270 @@
+{% extends 'core/base.html' %}
+{% block title %}Add Expense — {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{% url 'group_detail' group.id %}" class="back-link">← Back to {{ group.name }}</a>
+    <h1>Add Expense</h1>
+    <p class="page-sub">Anyone in the group can add their expense with payment proof.</p>
+</div>
+
+<div class="form-card">
+    <form method="POST" enctype="multipart/form-data" id="expense-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>Who Paid? *</label>
+            <p class="field-hint">Select the person who actually paid this expense</p>
+            <div class="payer-grid">
+                {% for member in members %}
+                <label class="payer-option {% if current_member_id == member.id %}selected{% endif %}">
+                    <input type="radio" name="paid_by" value="{{ member.id }}"
+                        {% if current_member_id == member.id %}checked{% endif %}
+                        onchange="updatePayerStyle(this)">
+                    <div class="payer-avatar">{{ member.name|first|upper }}</div>
+                    <div class="payer-name">{{ member.name }}</div>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>What was it for? *</label>
+                <input type="text" name="title" placeholder="e.g. Hotel booking, Food, Travel"
+                    required maxlength="200" value="{{ post.title|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label>Amount ({{ group.currency }}) *</label>
+                <input type="number" name="amount" step="0.01" min="0.01" placeholder="0.00"
+                    required value="{{ post.amount|default:'' }}" id="total-amount">
+            </div>
+        </div>
+
+        <!-- PAYMENT PROOF SECTION -->
+        <div class="form-group">
+            <label>Payment Proof</label>
+            <p class="field-hint">Attach proof so everyone trusts the expense</p>
+
+            <div class="proof-options">
+                <label class="proof-option selected" id="proof-none-label">
+                    <div class="proof-icon"></div>
+                    <div class="proof-text">
+                        <strong>🚫No Proof <input type="radio" name="proof_type" value="none" checked
+                        onchange="showProofSection('none')"></strong>
+                    </div>
+                </label>
+
+                <label class="proof-option" id="proof-cash-label">
+                    <input type="radio" name="proof_type" value="cash"
+                        onchange="showProofSection('cash')">
+                    <div class="proof-icon"></div>
+                    <div class="proof-text">
+                        <strong>💵 Paid in Cash</strong>
+                        <span>Physical money, no screenshot</span>
+                    </div>
+                </label>
+
+                <label class="proof-option" id="proof-image-label">
+                    <input type="radio" name="proof_type" value="image"
+                        onchange="showProofSection('image')">
+                    <div class="proof-icon"></div>
+                    <div class="proof-text">
+                        <strong>📸 Upload Screenshot</strong>
+                        <span>GPay, UPI, bank transfer, etc.</span>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Cash confirmation box -->
+            <div id="cash-info" class="proof-detail-box cash-box" style="display:none;">
+                <span>💵</span>
+                <div>
+                    <strong>Marked as Cash Payment</strong>
+                    <p>This expense will be recorded as paid in cash. No screenshot needed.</p>
+                </div>
+            </div>
+
+            <!-- Image upload box -->
+            <div id="image-upload" class="proof-detail-box upload-box" style="display:none;">
+                <div class="upload-area" id="upload-area"
+                    onclick="document.getElementById('proof-file').click()">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">
+                        <strong>Click to upload screenshot</strong>
+                        <span>GPay / PhonePe / Paytm / Bank screenshot</span>
+                        <span class="upload-hint">JPG, PNG, WEBP — Max 5MB</span>
+                    </div>
+                </div>
+                <input type="file" id="proof-file" name="proof_image"
+                    accept="image/*" style="display:none" onchange="previewImage(this)">
+                <div id="image-preview" style="display:none;">
+                    <img id="preview-img" src="" alt="Preview">
+                    <button type="button" class="remove-img" onclick="removeImage()">✕ Remove</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPLIT SECTION -->
+        <div class="form-group">
+            <label>Split Type</label>
+            <div class="split-type-tabs">
+                <button type="button" class="tab active" onclick="setSplitType('equal', this)">⚖️ Equal Split</button>
+                <button type="button" class="tab" onclick="setSplitType('custom', this)">✏️ Custom Amounts</button>
+            </div>
+            <input type="hidden" name="split_type" id="split_type" value="equal">
+        </div>
+
+        <div class="form-group">
+            <label>Split Among *</label>
+            <div class="members-check-grid" id="members-grid">
+                {% for member in members %}
+                <label class="member-check-item">
+                    <div class="check-header">
+                        <input type="checkbox" name="included_members" value="{{ member.id }}"
+                            checked onchange="updateSplits()">
+                        <div class="member-avatar sm">{{ member.name|first|upper }}</div>
+                        <span>{{ member.name }}</span>
+                    </div>
+                    <div class="custom-amount-field" id="custom-{{ member.id }}" style="display:none;">
+                        <input type="number" name="custom_{{ member.id }}" step="0.01" min="0"
+                            placeholder="0.00" class="custom-input" oninput="validateCustomTotal()">
+                    </div>
+                    <div class="share-display" id="share-{{ member.id }}"></div>
+                </label>
+                {% endfor %}
+            </div>
+            <div id="custom-total-info" style="display:none;" class="custom-total-info">
+                Total assigned: <span id="custom-total">0.00</span>
+                / <span id="expense-total">0.00</span>
+                <span id="total-status"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Notes (optional)</label>
+            <input type="text" name="notes" placeholder="Any extra info about this expense"
+                maxlength="500" value="{{ post.notes|default:'' }}">
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'group_detail' group.id %}" class="btn btn-outline">Cancel</a>
+            <button type="submit" class="btn btn-primary">Add Expense →</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let splitType = 'equal';
+
+function showProofSection(type) {
+    document.getElementById('cash-info').style.display = 'none';
+    document.getElementById('image-upload').style.display = 'none';
+    document.querySelectorAll('.proof-option').forEach(o => o.classList.remove('selected'));
+
+    if (type === 'cash') {
+        document.getElementById('cash-info').style.display = 'flex';
+        document.getElementById('proof-cash-label').classList.add('selected');
+    } else if (type === 'image') {
+        document.getElementById('image-upload').style.display = 'block';
+        document.getElementById('proof-image-label').classList.add('selected');
+    } else {
+        document.getElementById('proof-none-label').classList.add('selected');
+    }
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File too large. Max 5MB allowed.');
+            input.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('preview-img').src = e.target.result;
+            document.getElementById('image-preview').style.display = 'flex';
+            document.getElementById('upload-area').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function removeImage() {
+    document.getElementById('proof-file').value = '';
+    document.getElementById('image-preview').style.display = 'none';
+    document.getElementById('upload-area').style.display = 'flex';
+}
+
+function setSplitType(type, btn) {
+    splitType = type;
+    document.getElementById('split_type').value = type;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    if (type === 'custom') {
+        document.querySelectorAll('.custom-amount-field').forEach(f => {
+            const cb = f.closest('.member-check-item').querySelector('input[type=checkbox]');
+            if (cb.checked) f.style.display = 'block';
+        });
+        document.getElementById('custom-total-info').style.display = 'block';
+        document.querySelectorAll('.share-display').forEach(s => s.textContent = '');
+    } else {
+        document.querySelectorAll('.custom-amount-field').forEach(f => f.style.display = 'none');
+        document.getElementById('custom-total-info').style.display = 'none';
+        updateSplits();
+    }
+}
+
+function updateSplits() {
+    const amount = parseFloat(document.getElementById('total-amount').value) || 0;
+    const checked = document.querySelectorAll('input[name=included_members]:checked');
+    const count = checked.length;
+    if (splitType === 'equal' && count > 0) {
+        const share = (amount / count).toFixed(2);
+        document.querySelectorAll('input[name=included_members]').forEach(cb => {
+            const shareEl = document.getElementById('share-' + cb.value);
+            if (cb.checked) {
+                shareEl.textContent = '{{ group.currency }}' + share + ' each';
+                shareEl.style.color = '#6366f1';
+            } else {
+                shareEl.textContent = '';
+            }
+        });
+    }
+    if (splitType === 'custom') {
+        document.querySelectorAll('.custom-amount-field').forEach(f => {
+            const cb = f.closest('.member-check-item').querySelector('input[type=checkbox]');
+            f.style.display = cb.checked ? 'block' : 'none';
+        });
+        validateCustomTotal();
+    }
+}
+
+function validateCustomTotal() {
+    const amount = parseFloat(document.getElementById('total-amount').value) || 0;
+    let total = 0;
+    document.querySelectorAll('.custom-input').forEach(inp => total += parseFloat(inp.value) || 0);
+    document.getElementById('custom-total').textContent = total.toFixed(2);
+    document.getElementById('expense-total').textContent = amount.toFixed(2);
+    const statusEl = document.getElementById('total-status');
+    if (Math.abs(total - amount) < 0.02) {
+        statusEl.textContent = '✅ Matched!';
+        statusEl.style.color = '#22c55e';
+    } else {
+        statusEl.textContent = total > amount ? '⚠️ Over' : '⚠️ Under';
+        statusEl.style.color = '#f59e0b';
+    }
+}
+
+function updatePayerStyle(radio) {
+    document.querySelectorAll('.payer-option').forEach(o => o.classList.remove('selected'));
+    radio.closest('.payer-option').classList.add('selected');
+}
+
+document.getElementById('total-amount').addEventListener('input', updateSplits);
+updateSplits();
+</script>
+{% endblock %}

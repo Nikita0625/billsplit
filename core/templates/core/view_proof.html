@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+{% block title %}Payment Proof — {{ expense.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{% url 'group_detail' group.id %}" class="back-link">← Back to {{ group.name }}</a>
+    <h1>Payment Proof</h1>
+</div>
+
+<div class="proof-view-card">
+    <div class="proof-expense-info">
+        <div class="proof-title">{{ expense.title }}</div>
+        <div class="proof-meta">
+            Paid by <strong>{{ expense.paid_by.name }}</strong>
+            · {{ group.currency }}{{ expense.amount }}
+            · {{ expense.created_at|date:"d M Y, h:i A" }}
+        </div>
+    </div>
+
+    {% if expense.proof_type == 'cash' %}
+        <div class="proof-cash-display">
+            <div class="proof-big-icon">💵</div>
+            <h2>Paid in Cash</h2>
+            <p>{{ expense.paid_by.name }} confirmed this was paid in physical cash.</p>
+        </div>
+
+    {% elif expense.proof_type == 'image' and expense.proof_image %}
+        <div class="proof-image-display">
+            <p class="proof-label">📸 Screenshot uploaded by {{ expense.paid_by.name }}</p>
+            <img src="{{ expense.proof_image.url }}" alt="Payment proof">
+            <a href="{{ expense.proof_image.url }}" download class="btn btn-outline" style="margin-top:16px;">
+                ⬇️ Download Image
+            </a>
+        </div>
+
+    {% else %}
+        <div class="proof-cash-display">
+            <div class="proof-big-icon">🚫</div>
+            <h2>No Proof Provided</h2>
+            <p>{{ expense.paid_by.name }} did not attach any payment proof.</p>
+        </div>
+    {% endif %}
+
+    {% if expense.notes %}
+    <div class="proof-notes">
+        <strong>Notes:</strong> {{ expense.notes }}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

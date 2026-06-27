@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Join {{ group.name }} — SplitEase{% endblock %}
+
+{% block content %}
+<div class="join-page">
+    <div class="card join-card">
+        <div class="join-icon">👋</div>
+        <h2>You're invited to</h2>
+        <h1 class="group-name-large">{{ group.name }}</h1>
+        {% if group.description %}
+            <p class="group-desc">{{ group.description }}</p>
+        {% endif %}
+
+        <div class="members-preview">
+            <p class="members-label">Members already in this group:</p>
+            <div class="member-chips">
+                {% for member in group.members.all %}
+                    <span class="chip">{{ member.name }}</span>
+                {% empty %}
+                    <span class="chip-empty">No members yet</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <form method="POST" class="join-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Enter your name to join</label>
+                <input type="text" id="name" name="name" placeholder="Your name" required autofocus maxlength="100">
+                <small>If you've been here before, use the same name to rejoin.</small>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">
+                Join Group →
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

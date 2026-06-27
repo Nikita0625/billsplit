@@ -1,0 +1,93 @@
+{% extends 'core/base.html' %}
+{% block title %}BillSplit — Split Bills Easily{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-text">
+        <h1>Split bills.<br><span class="accent">No drama.</span></h1>
+        <p>Create a group, share a link, add expenses. We figure out who owes whom with the fewest transactions possible.</p>
+        <ul class="feature-list">
+            <li>✅ No sign-up required for anyone</li>
+            <li>✅ Smart debt simplification</li>
+            <li>✅ Shareable link — works on any device</li>
+            <li>✅ Real-time balance tracking</li>
+        </ul>
+    </div>
+
+    <div class="card create-card">
+        <h2>Create a New Group</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Group Name *</label>
+                <input type="text" name="name" placeholder="Enter the Group name" required maxlength="100">
+            </div>
+            <div class="form-group">
+                <label>Your Name *</label>
+                <input type="text" name="creator_name" placeholder="Enter your name" required maxlength="100">
+            </div>
+            <div class="form-group">
+                <label>Description (optional)</label>
+                <input type="text" name="description" placeholder="Trip description" maxlength="255">
+            </div>
+            <div class="form-group">
+                <label>Currency</label>
+                <select name="currency">
+    <option value="" disabled selected hidden>Choose your currency</option>
+    <option value="₹">₹ Indian Rupee</option>
+    <option value="$">$ US Dollar</option>
+    <option value="NPR">₨ Nepalese Rupee</option>
+    <option value="BTN">Nu. Bhutanese Ngultrum</option>
+    <option value="MMK">Ks Myanmar Kyat</option>
+    <option value="VND">₫ Vietnamese Đồng</option>
+    <option value="CNY">¥ Chinese Yuan</option>
+    <option value="KRW">₩ South Korean Won</option>
+    <option value="€">€ Euro</option>
+    <option value="£">£ British Pound</option>
+    <option value="¥">¥ Japanese Yen</option>
+    <option value="AED">د.إ UAE Dirham</option>
+    <option value="SAR">﷼ Saudi Riyal</option>
+    <option value="THB">฿ Thai Baht</option>
+    <option value="SGD">$ Singapore Dollar</option>
+    <option value="IDR">Rp Indonesian Rupiah</option>
+    <option value="MYR">RM Malaysian Ringgit</option>
+    <option value="MVR">Rf Maldivian Rufiyaa</option>
+    <option value="CHF">CHF Swiss Franc</option>
+    <option value="€">€ Euro</option>
+</select>
+
+
+
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Create Group →</button>
+        </form>
+    </div>
+</div>
+
+<div class="how-it-works">
+    <h2>How it works</h2>
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">1</div>
+            <h3>Create Group</h3>
+            <p>Give your group a name and enter your name. No account needed.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <h3>Share Link</h3>
+            <p>Copy the group link and share it with your friends. They join with just their name.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <h3>Add Expenses</h3>
+            <p>Anyone can add expenses — who paid, how much, and who was involved.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">4</div>
+            <h3>Settle Up</h3>
+            <p>We calculate the minimum number of payments to settle all debts. Done.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

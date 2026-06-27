@@ -1,0 +1,172 @@
+{% extends 'core/base.html' %}
+{% block title %}Add Personal IOU — {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{% url 'group_detail' group.id %}" class="back-link">← Back to {{ group.name }}</a>
+    <h1>💸 Personal IOU</h1>
+    <p class="page-sub">Record when someone lends money personally — not a group expense.</p>
+</div>
+
+<div class="form-card">
+    <div class="iou-explainer">
+        <div class="iou-explainer-icon">👟</div>
+        <div>
+            <strong>When to use this?</strong>
+            <p>Your friend bought something personal (clothes, food, footwear) but didn't have cash. You paid for them. Record it here and it'll be included in the final settlement automatically.</p>
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Who Lent the Money? *</label>
+                <p class="field-hint">The person who paid</p>
+                <select name="lender_id" required>
+                    <option value="">— Select person —</option>
+                    {% for member in members %}
+                    <option value="{{ member.id }}"
+                        {% if current_member_id == member.id %}selected{% endif %}>
+                        {{ member.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Who Borrowed? *</label>
+                <p class="field-hint">The person who will pay back</p>
+                <select name="borrower_id" required>
+                    <option value="">— Select person —</option>
+                    {% for member in members %}
+                    <option value="{{ member.id }}">{{ member.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Reason *</label>
+                <input type="text" name="reason" placeholder="e.g. Footwear, Clothes, Food"
+                    required maxlength="200" value="{{ post.reason|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label>Amount ({{ group.currency }}) *</label>
+                <input type="number" name="amount" step="0.01" min="0.01"
+                    placeholder="0.00" required value="{{ post.amount|default:'' }}">
+            </div>
+        </div>
+
+        <!-- PROOF -->
+        <div class="form-group">
+            <label>Payment Proof</label>
+            <p class="field-hint">Attach proof to avoid disputes later</p>
+            <div class="proof-options">
+                <label class="proof-option selected" id="proof-none-label">
+                    <input type="radio" name="proof_type" value="none" checked
+                        onchange="showProofSection('none')">
+                    <div class="proof-icon">🚫</div>
+                    <div class="proof-text">
+                        <strong>No Proof</strong>
+                        <span>Trust me bro</span>
+                    </div>
+                </label>
+                <label class="proof-option" id="proof-cash-label">
+                    <input type="radio" name="proof_type" value="cash"
+                        onchange="showProofSection('cash')">
+                    <div class="proof-icon">💵</div>
+                    <div class="proof-text">
+                        <strong>Paid in Cash</strong>
+                        <span>Physical money</span>
+                    </div>
+                </label>
+                <label class="proof-option" id="proof-image-label">
+                    <input type="radio" name="proof_type" value="image"
+                        onchange="showProofSection('image')">
+                    <div class="proof-icon">📸</div>
+                    <div class="proof-text">
+                        <strong>Upload Screenshot</strong>
+                        <span>GPay, UPI, etc.</span>
+                    </div>
+                </label>
+            </div>
+
+            <div id="cash-info" class="proof-detail-box cash-box" style="display:none;">
+                <span>💵</span>
+                <div>
+                    <strong>Marked as Cash Payment</strong>
+                    <p>No screenshot needed.</p>
+                </div>
+            </div>
+
+            <div id="image-upload" class="proof-detail-box upload-box" style="display:none;">
+                <div class="upload-area" id="upload-area"
+                    onclick="document.getElementById('proof-file').click()">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">
+                        <strong>Click to upload screenshot</strong>
+                        <span>GPay / PhonePe / Paytm / Bank</span>
+                        <span class="upload-hint">JPG, PNG — Max 5MB</span>
+                    </div>
+                </div>
+                <input type="file" id="proof-file" name="proof_image"
+                    accept="image/*" style="display:none" onchange="previewImage(this)">
+                <div id="image-preview" style="display:none;">
+                    <img id="preview-img" src="" alt="Preview">
+                    <button type="button" class="remove-img" onclick="removeImage()">✕ Remove</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Notes (optional)</label>
+            <input type="text" name="notes" placeholder="Any extra info"
+                maxlength="500" value="{{ post.notes|default:'' }}">
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'group_detail' group.id %}" class="btn btn-outline">Cancel</a>
+            <button type="submit" class="btn btn-primary">Record IOU →</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showProofSection(type) {
+    document.getElementById('cash-info').style.display = 'none';
+    document.getElementById('image-upload').style.display = 'none';
+    document.querySelectorAll('.proof-option').forEach(o => o.classList.remove('selected'));
+    if (type === 'cash') {
+        document.getElementById('cash-info').style.display = 'flex';
+        document.getElementById('proof-cash-label').classList.add('selected');
+    } else if (type === 'image') {
+        document.getElementById('image-upload').style.display = 'block';
+        document.getElementById('proof-image-label').classList.add('selected');
+    } else {
+        document.getElementById('proof-none-label').classList.add('selected');
+    }
+}
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) { alert('Max 5MB'); input.value = ''; return; }
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('preview-img').src = e.target.result;
+            document.getElementById('image-preview').style.display = 'flex';
+            document.getElementById('upload-area').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+function removeImage() {
+    document.getElementById('proof-file').value = '';
+    document.getElementById('image-preview').style.display = 'none';
+    document.getElementById('upload-area').style.display = 'flex';
+}
+</script>
+{% endblock %}
