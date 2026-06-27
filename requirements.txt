@@ -1,7 +1,7 @@
 Django>=4.2
-mysqlclient>=2.1
 Pillow>=10.0
 gunicorn
 dj-database-url
 whitenoise
 python-dotenv
+psycopg2-binary
