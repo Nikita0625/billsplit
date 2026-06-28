@@ -6,4 +6,3 @@ media/
 staticfiles/
 .env
 *.log
-billsplit/settings.py
