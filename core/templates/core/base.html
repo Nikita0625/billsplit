@@ -1,12 +1,13 @@
+{% extends 'core/base.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}BillSplit{% endblock %}</title>
+    <title>{% block title %}BillSplit — Split Bills Fairly{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
@@ -14,10 +15,17 @@
             <span class="brand-icon">💸</span>
             <span>BillSplit</span>
         </a>
+        <div class="nav-links">
+            <a href="/#how-it-works">How it Works</a>
+            <a href="/#features">Features</a>
+            <a href="/#faq">FAQ</a>
+            <a href="/help/">Help</a>
+        </div>
+        <a href="/" class="btn btn-primary nav-cta">Start Splitting →</a>
         {% block nav_extra %}{% endblock %}
     </nav>
 
-    <div class="container">
+    <div class="{% block container_class %}container{% endblock %}">
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -28,9 +36,34 @@
                 {% endfor %}
             </div>
         {% endif %}
-
         {% block content %}{% endblock %}
     </div>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="brand-icon">💸</span>
+                <span>BillSplit</span>
+                <p>Made with ❤️ in India 🇮🇳</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="/#how-it-works">How it Works</a>
+                    <a href="/#features">Features</a>
+                    <a href="/#faq">FAQ</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <a href="/help/">Help Center</a>
+                    <a href="/#faq">Common Questions</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 BillSplit. Free forever. No ads. No nonsense.</p>
+        </div>
+    </footer>
 
     <script src="{% static 'core/js/app.js' %}"></script>
     {% block extra_js %}{% endblock %}

@@ -314,3 +314,6 @@ def settlements_json(request, group_id):
     ious = group.ious.all()
     settlements = simplify_debts(members, expenses, ious)
     return JsonResponse({'settlements': settlements})
+
+def help_page(request):
+    return render(request, 'core/help.html')

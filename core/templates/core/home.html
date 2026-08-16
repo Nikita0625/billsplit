@@ -1,93 +1,443 @@
-{% extends 'core/base.html' %}
-{% block title %}BillSplit — Split Bills Easily{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BillSplit — Split Bills Fairly. No Fights. No Math.</title>
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
 
-{% block content %}
-<div class="hero">
-    <div class="hero-text">
-        <h1>Split bills.<br><span class="accent">No drama.</span></h1>
-        <p>Create a group, share a link, add expenses. We figure out who owes whom with the fewest transactions possible.</p>
-        <ul class="feature-list">
-            <li>✅ No sign-up required for anyone</li>
-            <li>✅ Smart debt simplification</li>
-            <li>✅ Shareable link — works on any device</li>
-            <li>✅ Real-time balance tracking</li>
-        </ul>
+<nav class="navbar">
+    <a href="/" class="brand">
+        <span class="brand-icon">💸</span>
+        <span>BillSplit</span>
+    </a>
+    <div class="nav-links">
+        <a href="#how-it-works">How it Works</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+        <a href="/help/">Help</a>
     </div>
+    <a href="#create" class="btn btn-primary nav-cta">Start Splitting →</a>
+</nav>
 
-    <div class="card create-card">
-        <h2>Create a New Group</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-                <label>Group Name *</label>
-                <input type="text" name="name" placeholder="Enter the Group name" required maxlength="100">
-            </div>
-            <div class="form-group">
-                <label>Your Name *</label>
-                <input type="text" name="creator_name" placeholder="Enter your name" required maxlength="100">
-            </div>
-            <div class="form-group">
-                <label>Description (optional)</label>
-                <input type="text" name="description" placeholder="Trip description" maxlength="255">
-            </div>
-            <div class="form-group">
-                <label>Currency</label>
-                <select name="currency">
-    <option value="" disabled selected hidden>Choose your currency</option>
-    <option value="₹">₹ Indian Rupee</option>
-    <option value="$">$ US Dollar</option>
-    <option value="NPR">₨ Nepalese Rupee</option>
-    <option value="BTN">Nu. Bhutanese Ngultrum</option>
-    <option value="MMK">Ks Myanmar Kyat</option>
-    <option value="VND">₫ Vietnamese Đồng</option>
-    <option value="CNY">¥ Chinese Yuan</option>
-    <option value="KRW">₩ South Korean Won</option>
-    <option value="€">€ Euro</option>
-    <option value="£">£ British Pound</option>
-    <option value="¥">¥ Japanese Yen</option>
-    <option value="AED">د.إ UAE Dirham</option>
-    <option value="SAR">﷼ Saudi Riyal</option>
-    <option value="THB">฿ Thai Baht</option>
-    <option value="SGD">$ Singapore Dollar</option>
-    <option value="IDR">Rp Indonesian Rupiah</option>
-    <option value="MYR">RM Malaysian Ringgit</option>
-    <option value="MVR">Rf Maldivian Rufiyaa</option>
-    <option value="CHF">CHF Swiss Franc</option>
-    <option value="€">€ Euro</option>
-</select>
-
-
-
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary btn-full">Create Group →</button>
-        </form>
+{% if messages %}
+<div class="container">
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+            <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+        </div>
+        {% endfor %}
     </div>
 </div>
+{% endif %}
 
-<div class="how-it-works">
-    <h2>How it works</h2>
-    <div class="steps">
-        <div class="step">
-            <div class="step-num">1</div>
-            <h3>Create Group</h3>
-            <p>Give your group a name and enter your name. No account needed.</p>
+<!-- HERO SECTION -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="hero-text">
+            <div class="hero-badge">🇮🇳 Made for Indian friend groups</div>
+            <h1>Split bills fairly.<br><span class="accent">No fights.<br>No math.</span></h1>
+            <p>Create a group, share a link, add expenses with payment proof. We calculate who owes whom with the fewest transactions possible.</p>
+            <div class="hero-buttons">
+                <a href="#create" class="btn btn-primary btn-lg">Start Splitting →</a>
+                <a href="#how-it-works" class="btn btn-outline btn-lg">See How it Works</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <strong>100%</strong>
+                    <span>Free Forever</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <strong>0</strong>
+                    <span>Accounts Needed</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <strong>∞</strong>
+                    <span>Groups & Expenses</span>
+                </div>
+            </div>
         </div>
-        <div class="step">
-            <div class="step-num">2</div>
-            <h3>Share Link</h3>
-            <p>Copy the group link and share it with your friends. They join with just their name.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">3</div>
-            <h3>Add Expenses</h3>
-            <p>Anyone can add expenses — who paid, how much, and who was involved.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">4</div>
-            <h3>Settle Up</h3>
-            <p>We calculate the minimum number of payments to settle all debts. Done.</p>
+        <div class="hero-card-preview">
+            <div class="preview-card">
+                <div class="preview-header">
+                    <span class="preview-title">🏖️ Goa Trip 2025</span>
+                    <span class="preview-members">4 members</span>
+                </div>
+                <div class="preview-balances">
+                    <div class="preview-balance-item">
+                        <div class="preview-avatar" style="background:#6366f1">R</div>
+                        <div class="preview-info">
+                            <span>Rahul</span>
+                            <span class="gets-back">gets back ₹5,400</span>
+                        </div>
+                    </div>
+                    <div class="preview-balance-item">
+                        <div class="preview-avatar" style="background:#8b5cf6">P</div>
+                        <div class="preview-info">
+                            <span>Priya</span>
+                            <span class="owes-money">owes ₹2,100</span>
+                        </div>
+                    </div>
+                    <div class="preview-balance-item">
+                        <div class="preview-avatar" style="background:#06b6d4">A</div>
+                        <div class="preview-info">
+                            <span>Amit</span>
+                            <span class="owes-money">owes ₹1,800</span>
+                        </div>
+                    </div>
+                    <div class="preview-balance-item">
+                        <div class="preview-avatar" style="background:#f59e0b">S</div>
+                        <div class="preview-info">
+                            <span>Sneha</span>
+                            <span class="owes-money">owes ₹1,500</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-settle">
+                    <div class="preview-settle-title">Settle Up — 2 payments only</div>
+                    <div class="preview-settle-item">
+                        <span>Priya</span>
+                        <span class="settle-arrow">── ₹2,100 ──→</span>
+                        <span>Rahul</span>
+                    </div>
+                    <div class="preview-settle-item">
+                        <span>Amit</span>
+                        <span class="settle-arrow">── ₹1,800 ──→</span>
+                        <span>Rahul</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how-it-works">
+    <div class="section-container">
+        <div class="section-label">Simple Process</div>
+        <h2>How it works</h2>
+        <p class="section-sub">From creating a group to settling up — takes less than 2 minutes.</p>
+        <div class="how-steps">
+            <div class="how-step">
+                <div class="how-step-num">1</div>
+                <div class="how-step-icon">👥</div>
+                <h3>Create Group</h3>
+                <p>Enter your group name and your name. No signup, no email, no password needed.</p>
+            </div>
+            <div class="how-arrow">→</div>
+            <div class="how-step">
+                <div class="how-step-num">2</div>
+                <div class="how-step-icon">🔗</div>
+                <h3>Share Link</h3>
+                <p>Copy the group link and share on WhatsApp. Friends join by just entering their name.</p>
+            </div>
+            <div class="how-arrow">→</div>
+            <div class="how-step">
+                <div class="how-step-num">3</div>
+                <div class="how-step-icon">🧾</div>
+                <h3>Add Expenses</h3>
+                <p>Anyone can add expenses with payment proof — GPay screenshot, cash, or no proof.</p>
+            </div>
+            <div class="how-arrow">→</div>
+            <div class="how-step">
+                <div class="how-step-num">4</div>
+                <div class="how-step-icon">✅</div>
+                <h3>Settle Up</h3>
+                <p>Our smart algorithm shows minimum payments needed. Everyone pays once and it's done!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CREATE GROUP FORM -->
+<section class="create-section" id="create">
+    <div class="section-container">
+        <div class="create-grid">
+            <div class="create-text">
+                <div class="section-label">Get Started Free</div>
+                <h2>Create your group<br>in 30 seconds</h2>
+                <ul class="create-checklist">
+                    <li>✅ No account needed</li>
+                    <li>✅ Share link with anyone</li>
+                    <li>✅ Add expenses with proof</li>
+                    <li>✅ Smart settlement calculation</li>
+                    <li>✅ Personal IOU tracking</li>
+                    <li>✅ 100% free forever</li>
+                </ul>
+            </div>
+            <div class="card create-card">
+                <h3>Create a New Group</h3>
+                <form method="POST" action="/">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Group Name *</label>
+                        <input type="text" name="name" placeholder="e.g. Goa Trip 2025, Flat Expenses" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Your Name *</label>
+                        <input type="text" name="creator_name" placeholder="e.g. Rahul" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Description (optional)</label>
+                        <input type="text" name="description" placeholder="e.g. Weekend trip with college friends" maxlength="255">
+                    </div>
+                    <div class="form-group">
+                        <label>Currency</label>
+                        <select name="currency">
+                            <option value="₹">₹ Indian Rupee</option>
+                            <option value="$">$ US Dollar</option>
+                            <option value="€">€ Euro</option>
+                            <option value="£">£ British Pound</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Create Group →</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="features-section" id="features">
+    <div class="section-container">
+        <div class="section-label">Why BillSplit</div>
+        <h2>Everything you need.<br>Nothing you don't.</h2>
+        <p class="section-sub">Built specifically for Indian friend groups who are tired of WhatsApp arguments about money.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📸</div>
+                <h3>Payment Proof</h3>
+                <p>Upload GPay, PhonePe, or Paytm screenshot as proof. Or mark as cash. No more "bhai tune pay kiya kya?"</p>
+                <span class="feature-tag unique">Unique Feature</span>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💸</div>
+                <h3>Personal IOU</h3>
+                <p>Friend forgot wallet? Record personal loans separately. Gets included in final settlement automatically.</p>
+                <span class="feature-tag unique">Unique Feature</span>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧮</div>
+                <h3>Smart Settlement</h3>
+                <p>Our algorithm calculates minimum number of payments. 5 people, 20 expenses — settled in just 3-4 payments.</p>
+                <span class="feature-tag">Smart Algorithm</span>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔗</div>
+                <h3>Just Share a Link</h3>
+                <p>No app download. No account creation. Share a link on WhatsApp — friends join in 5 seconds.</p>
+                <span class="feature-tag">No Login</span>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚖️</div>
+                <h3>Equal or Custom Split</h3>
+                <p>Split equally among everyone or enter custom amounts for each person. Full flexibility.</p>
+                <span class="feature-tag">Flexible</span>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Works on Mobile</h3>
+                <p>Fully responsive. Works perfectly on any phone, tablet, or laptop. No app needed.</p>
+                <span class="feature-tag">Mobile Friendly</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VS SECTION -->
+<section class="vs-section">
+    <div class="section-container">
+        <h2>Why not just use Splitwise?</h2>
+        <p class="section-sub">Good question. Here's how we compare:</p>
+        <div class="vs-table">
+            <div class="vs-header">
+                <div></div>
+                <div class="vs-us">💸 BillSplit</div>
+                <div class="vs-them">Others</div>
+            </div>
+            <div class="vs-row">
+                <div>Payment Proof (screenshot)</div>
+                <div class="vs-yes">✅ Yes</div>
+                <div class="vs-no">❌ No</div>
+            </div>
+            <div class="vs-row">
+                <div>Personal IOU tracking</div>
+                <div class="vs-yes">✅ Yes</div>
+                <div class="vs-no">❌ No</div>
+            </div>
+            <div class="vs-row">
+                <div>No account needed</div>
+                <div class="vs-yes">✅ Yes</div>
+                <div class="vs-no">❌ No</div>
+            </div>
+            <div class="vs-row">
+                <div>100% Free</div>
+                <div class="vs-yes">✅ Yes</div>
+                <div class="vs-no">⚠️ Partially</div>
+            </div>
+            <div class="vs-row">
+                <div>Smart debt simplification</div>
+                <div class="vs-yes">✅ Yes</div>
+                <div class="vs-no">⚠️ Basic</div>
+            </div>
+            <div class="vs-row">
+                <div>Indian Rupee focused</div>
+                <div class="vs-yes">✅ Yes</div>
+                <div class="vs-no">⚠️ Generic</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ SECTION -->
+<section class="faq-section" id="faq">
+    <div class="section-container">
+        <div class="section-label">Got Questions?</div>
+        <h2>Frequently Asked Questions</h2>
+        <p class="section-sub">Everything you need to know about BillSplit.</p>
+        <div class="faq-list">
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Do my friends need to create an account?
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    No! Nobody needs to create an account. You create the group, share the link, and your friends just enter their name to join. That's it. Works in 5 seconds.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    What if someone added an expense before others joined?
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    This is a common situation! When adding an expense, make sure to select all members in the "Split Among" section. If a mistake happens, you can delete the expense and re-add it with all members selected. We're also building a "Recalculate Split" button coming soon!
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How does the Smart Settlement work?
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    Our algorithm calculates each person's net balance (total paid minus total owed). Then it pairs up the biggest creditor with the biggest debtor and settles them one by one. Result: minimum number of payments needed. For example, 5 people with 15 expenses typically settle with just 4 payments instead of 15!
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    What is the Personal IOU feature?
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    Sometimes a friend buys something personal (clothes, footwear) but doesn't have cash. You pay for them. This is a personal loan — not a group expense. Record it as an IOU and it automatically gets included in the final settlement calculation.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How does Payment Proof work?
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    When adding an expense, you can attach proof of payment — upload a GPay, PhonePe, Paytm, or bank transfer screenshot. Or mark it as "Paid in Cash". All group members can see the proof badge on each expense and click to view the full screenshot.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Is BillSplit completely free?
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    Yes! 100% free. No hidden charges, no premium plans, no ads. Create unlimited groups, add unlimited expenses, invite unlimited members — all free forever.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Can I use it for roommate expenses?
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    Absolutely! BillSplit works great for roommates, trips, office lunches, family events, or any group situation where people share expenses. Create a group and keep it open for as long as needed.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    What currencies are supported?
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-answer">
+                    Indian Rupee (₹) is the default and primary currency. We also support US Dollar ($), Euro (€), and British Pound (£). Select your currency when creating the group.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CALL TO ACTION -->
+<section class="cta-section">
+    <div class="cta-inner">
+        <h2>Ready to split fairly?</h2>
+        <p>No more WhatsApp arguments. No more awkward reminders. Just fair splits.</p>
+        <a href="#create" class="btn btn-white btn-lg">Create Your Group →</a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <div class="brand">
+                <span class="brand-icon">💸</span>
+                <span>BillSplit</span>
+            </div>
+            <p>Made with ❤️ in India 🇮🇳</p>
+            <p>Free forever. No ads. No nonsense.</p>
+        </div>
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="#how-it-works">How it Works</a>
+                <a href="#features">Features</a>
+                <a href="#faq">FAQ</a>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <a href="/help/">Help Center</a>
+                <a href="#faq">Common Questions</a>
+                <a href="#create">Create Group</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2025 BillSplit. Built with Django & ❤️ in Ahmedabad, Gujarat.</p>
+    </div>
+</footer>
+
+<script src="{% static 'core/js/app.js' %}"></script>
+<script>
+function toggleFaq(btn) {
+    const item = btn.parentElement;
+    const answer = item.querySelector('.faq-answer');
+    const icon = btn.querySelector('.faq-icon');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-answer').style.maxHeight = null;
+        i.querySelector('.faq-icon').textContent = '+';
+    });
+    if (!isOpen) {
+        item.classList.add('open');
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        icon.textContent = '−';
+    }
+}
+</script>
+</body>
+</html>

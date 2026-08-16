@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center — BillSplit</title>
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar">
+    <a href="/" class="brand">
+        <span class="brand-icon">💸</span>
+        <span>BillSplit</span>
+    </a>
+    <div class="nav-links">
+        <a href="/#how-it-works">How it Works</a>
+        <a href="/#features">Features</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/help/">Help</a>
+    </div>
+    <a href="/" class="btn btn-primary nav-cta">Start Splitting →</a>
+</nav>
+
+<div class="container">
+    <div class="help-header">
+        <h1>🙋 Help Center</h1>
+        <p>Everything you need to know to use BillSplit correctly.</p>
+    </div>
+
+    <div class="help-grid">
+
+        <div class="help-section">
+            <h2>📖 How to Use BillSplit</h2>
+
+            <div class="help-step">
+                <div class="help-step-num">1</div>
+                <div class="help-step-content">
+                    <h3>Create a Group</h3>
+                    <p>Go to the homepage. Enter your group name (e.g. "Goa Trip") and your name. Select currency. Click Create Group.</p>
+                    <div class="help-tip">💡 Tip: Use a descriptive name so everyone knows which group it is.</div>
+                </div>
+            </div>
+
+            <div class="help-step">
+                <div class="help-step-num">2</div>
+                <div class="help-step-content">
+                    <h3>Share the Link</h3>
+                    <p>After creating the group, click the "🔗 Copy Link" button. Send this link to all your friends on WhatsApp.</p>
+                    <div class="help-tip">💡 Tip: Make sure EVERYONE joins before anyone adds expenses. This ensures fair splits.</div>
+                </div>
+            </div>
+
+            <div class="help-step">
+                <div class="help-step-num">3</div>
+                <div class="help-step-content">
+                    <h3>Friends Join the Group</h3>
+                    <p>When friends open the link, they see "Enter your name to join". They type their name and click Join Group. No account needed!</p>
+                    <div class="help-warning">⚠️ Important: Ask everyone to join FIRST before adding any expenses. If someone adds an expense before others join, the split won't include them.</div>
+                </div>
+            </div>
+
+            <div class="help-step">
+                <div class="help-step-num">4</div>
+                <div class="help-step-content">
+                    <h3>Add Expenses</h3>
+                    <p>Click "+ Add Expense". Fill in:</p>
+                    <ul class="help-list">
+                        <li><strong>Who Paid</strong> — select the person who actually paid</li>
+                        <li><strong>Amount</strong> — how much was paid</li>
+                        <li><strong>Title</strong> — what was it for</li>
+                        <li><strong>Split Among</strong> — select ALL members (very important!)</li>
+                        <li><strong>Split Type</strong> — Equal (default) or Custom amounts</li>
+                        <li><strong>Payment Proof</strong> — upload screenshot or mark as cash</li>
+                    </ul>
+                    <div class="help-warning">⚠️ Important: Always select ALL members in "Split Among" unless the expense was only for specific people.</div>
+                </div>
+            </div>
+
+            <div class="help-step">
+                <div class="help-step-num">5</div>
+                <div class="help-step-content">
+                    <h3>Record Personal IOUs</h3>
+                    <p>If a friend bought something personal (clothes, food) but asked you to pay — that's a personal IOU, not a group expense.</p>
+                    <p>Click "+ Record Personal IOU" in the group page. Select who lent and who borrowed. Add amount and reason.</p>
+                    <div class="help-tip">💡 Tip: IOUs are automatically included in the final settlement calculation.</div>
+                </div>
+            </div>
+
+            <div class="help-step">
+                <div class="help-step-num">6</div>
+                <div class="help-step-content">
+                    <h3>Check Balances & Settle Up</h3>
+                    <p>The Balances section shows each person's net position:</p>
+                    <ul class="help-list">
+                        <li><span style="color:#22c55e">Green = gets back money</span></li>
+                        <li><span style="color:#ef4444">Red = owes money</span></li>
+                        <li>Grey = all settled</li>
+                    </ul>
+                    <p>The "Settle Up" section shows the minimum payments needed to clear all debts.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-sidebar">
+            <div class="help-card">
+                <h3>⚠️ Common Mistakes</h3>
+                <div class="mistake-item">
+                    <div class="mistake-title">Adding expense before everyone joins</div>
+                    <div class="mistake-desc">Ask all friends to join first, then start adding expenses.</div>
+                </div>
+                <div class="mistake-item">
+                    <div class="mistake-title">Not selecting all members in split</div>
+                    <div class="mistake-desc">Always check all members in "Split Among" for shared expenses.</div>
+                </div>
+                <div class="mistake-item">
+                    <div class="mistake-title">Using personal expense as group expense</div>
+                    <div class="mistake-desc">Use Personal IOU for personal loans, not Add Expense.</div>
+                </div>
+            </div>
+
+            <div class="help-card">
+                <h3>💡 Pro Tips</h3>
+                <ul class="help-list">
+                    <li>Share the group link at the start of the trip</li>
+                    <li>Add expenses immediately after paying</li>
+                    <li>Always attach payment proof for big amounts</li>
+                    <li>Use custom split if shares are unequal</li>
+                    <li>Record IOUs immediately so you don't forget</li>
+                </ul>
+            </div>
+
+            <div class="help-card">
+                <h3>🆘 Need More Help?</h3>
+                <p>Check our <a href="/#faq">FAQ section</a> on the homepage for common questions.</p>
+                <br>
+                <a href="/" class="btn btn-primary btn-full">Go to Homepage</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <div class="brand">
+                <span class="brand-icon">💸</span>
+                <span>BillSplit</span>
+            </div>
+            <p>Made with ❤️ in India 🇮🇳</p>
+        </div>
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="/#how-it-works">How it Works</a>
+                <a href="/#features">Features</a>
+                <a href="/#faq">FAQ</a>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <a href="/help/">Help Center</a>
+                <a href="/#faq">Common Questions</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2025 BillSplit. Built with Django & ❤️ in Ahmedabad, Gujarat.</p>
+    </div>
+</footer>
+
+<script src="{% static 'core/js/app.js' %}"></script>
+</body>
+</html>

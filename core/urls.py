@@ -11,4 +11,5 @@ urlpatterns = [
     path('group/<uuid:group_id>/iou/add/', views.add_iou, name='add_iou'),
     path('group/<uuid:group_id>/iou/<int:iou_id>/delete/', views.delete_iou, name='delete_iou'),
     path('group/<uuid:group_id>/settlements.json', views.settlements_json, name='settlements_json'),
+    path('help/', views.help_page, name='help_page'),
 ]
