@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
-
+from datetime import timedelta
+from django.utils import timezone
 
 class Group(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -8,15 +9,28 @@ class Group(models.Model):
     description = models.CharField(max_length=255, blank=True)
     currency = models.CharField(max_length=10, default='₹')
     created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    delete_requested_at = models.DateTimeField(null=True, blank=True)
 
-    def __str__(self):
-        return self.name
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(days=90)
+        super().save(*args, **kwargs)
 
-    def total_expenses(self):
-        return sum(e.amount for e in self.expenses.all())
+    def is_expired(self):
+        return timezone.now() > self.expires_at
 
-    def member_count(self):
-        return self.members.count()
+    def days_remaining(self):
+        delta = self.expires_at - timezone.now()
+        return max(0, delta.days)
+
+    def deletion_requested(self):
+        return self.delete_requested_at is not None
+
+    def grace_period_ends(self):
+        if self.delete_requested_at:
+            return self.delete_requested_at + timedelta(days=7)
+        return None
 
 
 class Member(models.Model):

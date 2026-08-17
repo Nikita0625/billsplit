@@ -29,6 +29,9 @@ def home(request):
 
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id)
+    if group.is_expired():
+        return render(request, 'core/expired.html', {'group': group})
+
     members = group.members.all().order_by('joined_at')
     expenses = group.expenses.all().select_related('paid_by').prefetch_related('splits__member').order_by('-created_at')
     ious = group.ious.all().select_related('lender', 'borrower').order_by('-created_at')
@@ -317,3 +320,28 @@ def settlements_json(request, group_id):
 
 def help_page(request):
     return render(request, 'core/help.html')
+
+def request_delete_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    member_id = request.session.get(f'member_{group.id}')
+    if not member_id:
+        messages.error(request, 'You must be a member to delete this group.')
+        return redirect('group_detail', group_id=group.id)
+    if request.method == 'POST':
+        group.delete_requested_at = timezone.now()
+        group.save()
+        messages.success(request, '⚠️ Group deletion requested. Group will be permanently deleted after 7 days. You can cancel anytime.')
+    return redirect('group_detail', group_id=group.id)
+
+
+def cancel_delete_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    member_id = request.session.get(f'member_{group.id}')
+    if not member_id:
+        messages.error(request, 'You must be a member.')
+        return redirect('group_detail', group_id=group.id)
+    if request.method == 'POST':
+        group.delete_requested_at = None
+        group.save()
+        messages.success(request, '✅ Group deletion cancelled!')
+    return redirect('group_detail', group_id=group.id)

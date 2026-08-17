@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Expired — BillSplit</title>
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+</head>
+<body>
+<nav class="navbar">
+    <a href="/" class="brand">
+        <span class="brand-icon">💸</span>
+        <span>BillSplit</span>
+    </a>
+</nav>
+<div class="container">
+    <div class="expired-card">
+        <div class="expired-icon">⏰</div>
+        <h1>This group has expired</h1>
+        <p>The group <strong>{{ group.name }}</strong> was automatically deleted after 90 days.</p>
+        <p>Groups are automatically deleted to keep your data private and our servers clean.</p>
+        <a href="/" class="btn btn-primary">Create a New Group →</a>
+    </div>
+</div>
+</body>
+</html>

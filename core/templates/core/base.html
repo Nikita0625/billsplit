@@ -13,17 +13,25 @@
         <a href="/" class="brand">
             <span class="brand-icon">💸</span>
             <span>BillSplit</span>
-        </a>
+         </a>
         <div class="nav-links">
             <a href="/#how-it-works">How it Works</a>
             <a href="/#features">Features</a>
             <a href="/#faq">FAQ</a>
             <a href="/help/">Help</a>
         </div>
-        <a href="/" class="btn btn-primary nav-cta">Start Splitting →</a>
-        {% block nav_extra %}{% endblock %}
+        <div class="nav-right">
+            {% if current_group_id %}
+                <a href="/group/{{ current_group_id }}/" class="btn btn-outline nav-back">
+                    ← Back to Group
+                </a>
+            {% endif %}
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+            <a href="/" class="btn btn-primary nav-cta">Start Splitting →</a>
+                {% block nav_extra %}{% endblock %}
+        </div>
     </nav>
-
+    
     <div class="{% block container_class %}container{% endblock %}">
         {% if messages %}
             <div class="messages">

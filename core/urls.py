@@ -12,4 +12,6 @@ urlpatterns = [
     path('group/<uuid:group_id>/iou/<int:iou_id>/delete/', views.delete_iou, name='delete_iou'),
     path('group/<uuid:group_id>/settlements.json', views.settlements_json, name='settlements_json'),
     path('help/', views.help_page, name='help_page'),
+    path('group/<uuid:group_id>/request-delete/', views.request_delete_group, name='request_delete_group'),
+    path('group/<uuid:group_id>/cancel-delete/', views.cancel_delete_group, name='cancel_delete_group'),
 ]

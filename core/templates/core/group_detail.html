@@ -20,6 +20,16 @@
         <button class="btn btn-outline" onclick="copyLink()">🔗 Copy Link</button>
         {% if current_member %}
             <a href="{% url 'add_expense' group.id %}" class="btn btn-primary">+ Add Expense</a>
+            <!-- ADD DELETE BUTTON HERE -->
+            {% if not group.deletion_requested %}
+            <form method="POST" action="{% url 'request_delete_group' group.id %}"
+                onsubmit="return confirm('Request to delete this group? It will be deleted after 7 days.')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline" style="color:#dc2626;border-color:#fecaca;">
+                    🗑️ Delete Group
+                </button>
+            </form>
+            {% endif %}
         {% endif %}
     </div>
 </div>
@@ -45,6 +55,30 @@
     </a>
 </div>
 {% endif %}
+
+{% if group.days_remaining <= 7 %}
+<div class="expiry-warning danger">
+    ⚠️ This group expires in {{ group.days_remaining }} days and will be automatically deleted!
+</div>
+{% elif group.days_remaining <= 30 %}
+<div class="expiry-warning">
+    ⏰ This group expires in {{ group.days_remaining }} days.
+</div>
+{% endif %}
+
+{% if group.deletion_requested %}
+<div class="expiry-warning danger">
+    🗑️ Deletion requested! This group will be permanently deleted on
+    {{ group.grace_period_ends|date:"d M Y" }}.
+    {% if current_member %}
+        <form method="POST" action="{% url 'cancel_delete_group' group.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-cancel-delete">Cancel Deletion</button>
+        </form>
+    {% endif %}
+</div>
+{% endif %}
+
 
 <div class="group-grid">
 
@@ -199,6 +233,11 @@
         <div class="section">
             <div class="section-header">
                 <h2>💸 Personal IOUs</h2>
+                    <div class="iou-what-is">
+                        <strong>What is a Personal IOU?</strong>
+                        When a friend buys something personal (clothes, food, footwear) but asks you to pay — record it here. It gets included in the final settlement automatically.
+                        <a href="/help/#iou" style="color:var(--primary);font-weight:700;">Learn more →</a>
+                    </div>
                 {% if ious %}
                     <span class="badge badge-orange">{{ ious.count }}</span>
                 {% endif %}
