@@ -29,9 +29,12 @@ def home(request):
 
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    if group.is_expired():
-        return render(request, 'core/expired.html', {'group': group})
-
+    try:
+        if group.is_expired():
+            return render(request, 'core/expired.html', {'group': group})
+    except Exception:
+        pass
+    
     members = group.members.all().order_by('joined_at')
     expenses = group.expenses.all().select_related('paid_by').prefetch_related('splits__member').order_by('-created_at')
     ious = group.ious.all().select_related('lender', 'borrower').order_by('-created_at')
